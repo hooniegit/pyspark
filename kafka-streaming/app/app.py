@@ -9,7 +9,7 @@ spark = SparkSession.builder \
 
 # set kafka servers & topics
 kafka_bootstrap_servers = 'localhost:9092'
-input_kafka_topic = "demo"
+input_kafka_topic = "spark_streaming"
 
 # set buffer & batch
 buffer, batch = [], []
@@ -36,15 +36,20 @@ def set_buffer(batchDF, batchId, spark):
     from lib.json.create_dataframe import create_dataframe
     from lib.dataframe.print_to_terminal import print_dataframe
  
-    data = export_all(batchDF=batchDF, spark=spark)
-    buffer.append(data)
-    batch.append(batchId)
+    try:
+        global buffer, batch
+        data = export_all(batchDF=batchDF, spark=spark)
+        buffer.append(data)
+        batch.append(batchId)
+        
+        if len(buffer) >= buffer_size:
+            df_buffer = create_dataframe(data=data, spark=spark)
+            print_dataframe(df_buffer=df_buffer, spark=spark)
+            print(">>>>>> Let's check out batches " + str(batch)) # need to fix
+            buffer, batch = [], []
     
-    if len(buffer) >= buffer_size:
-        df_buffer = create_dataframe(data=data, spark=spark)
-        print_dataframe(df_buffer=df_buffer, spark=spark)
-        print(">>>>>> Let's check out batches " + str(batch)) # need to fix
-        buffer, batch = [], []
+    except Exception as E:
+        print(f">>>>>> Oops, error appeared.. \n{E}")
 
 # set query
 query = df \
