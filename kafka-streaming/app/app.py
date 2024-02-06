@@ -13,7 +13,7 @@ input_kafka_topic = "spark_streaming"
 
 # set buffer & batch
 buffer, batch = [], []
-buffer_size = 10
+buffer_size = 5
 
 # read stream
 df = spark \
@@ -43,7 +43,7 @@ def set_buffer(batchDF, batchId, spark):
         batch.append(batchId)
         
         if len(buffer) >= buffer_size:
-            df_buffer = create_dataframe(data=data, spark=spark)
+            df_buffer = create_dataframe(buffer=buffer, spark=spark)
             print_dataframe(df_buffer=df_buffer, spark=spark)
             print(">>>>>> Let's check out batches " + str(batch)) # need to fix
             buffer, batch = [], []
